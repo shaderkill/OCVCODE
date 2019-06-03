@@ -1,0 +1,11 @@
+{
+    "python.pythonPath": "C:\\Users\\Shaderkill\\AppData\\Local\\Programs\\Python\\Python37-32\\python.exe",
+    "python.linting.pylintEnabled": true,
+    "python.linting.pydocstyleEnabled": false,
+    "python.linting.enabled": true,
+    "python.linting.pylamaEnabled": false,
+    "python.linting.pylintArgs": [
+        "--extension-pkg-whitelist=cv2",
+        "--generate-members",
+    ]
+}
