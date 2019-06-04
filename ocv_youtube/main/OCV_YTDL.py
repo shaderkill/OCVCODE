@@ -42,9 +42,9 @@ def detectAndDisplay(frame):
         faceROI = frame_gray[y:y+h, x:x+w]
         faceColor = frame[y:y+h, x:x+w]
         #-- Capture image from Frame (experimental)
-         """if not compareframe(faceROI):
-            path = 'D:\\Usuarios\\cristian.molina\\Desktop\\Instituto\\OCVCODE-master\\ocv_youtube\\photos'
-            cv2.imwrite(os.path.join(path, "face%d.jpg" % faces_count), faceColor)"""
+        """if not compareframe(faceROI):
+        path = 'D:\\Usuarios\\cristian.molina\\Desktop\\Instituto\\OCVCODE-master\\ocv_youtube\\photos'
+        cv2.imwrite(os.path.join(path, "face%d.jpg" % faces_count), faceColor)"""
         frame = cv2.rectangle(frame, center, (x+w,y+h), (0, 255, 0), 2)
         faces_xywh = str(x),str(y),str(w),str(h)
         faces_str = str(faces_xywh)
