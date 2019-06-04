@@ -20,6 +20,7 @@ def tryload():
     print("Cores:",cv2.getNumberOfCPUs())
     print("Optimized:",cv2.useOptimized())
     print("-"*100)
+    #Info CPU modificado por Cristian 04-06-2019
     #-- Load the cascades
     if not face_cascade.load(cv2.samples.findFile(face_cascade_name)):
         print('--(!)Error loading face cascade')
@@ -40,15 +41,14 @@ def detectAndDisplay(frame):
         center = (x, y)
         faceROI = frame_gray[y:y+h, x:x+w]
         faceColor = frame[y:y+h, x:x+w]
-        #-- Capture image from Frame
-        """if not compareframe(faceROI):
+        #-- Capture image from Frame (experimental)
+         """if not compareframe(faceROI):
             path = 'D:\\Usuarios\\cristian.molina\\Desktop\\Instituto\\OCVCODE-master\\ocv_youtube\\photos'
             cv2.imwrite(os.path.join(path, "face%d.jpg" % faces_count), faceColor)"""
         frame = cv2.rectangle(frame, center, (x+w,y+h), (0, 255, 0), 2)
         faces_xywh = str(x),str(y),str(w),str(h)
         faces_str = str(faces_xywh)
         cv2.putText(frame,faces_str, (x-5,y-5),cv2.FONT_HERSHEY_PLAIN,1, (255, 0, 255),1)
-        
         #-- Detect eyes
         eyes = eyes_cascade.detectMultiScale(faceROI)
         for (x2, y2, w2, h2) in eyes:
@@ -57,7 +57,7 @@ def detectAndDisplay(frame):
             cv2.circle(frame, eye_center, radius, (255, 0, 0), 2)
 
     cv2.imshow('Capture - Face detection', frame)
-
+#Modulo modificado por Cristian 04-06-2019
 
 def playvideo():
     cap = cv2.VideoCapture(read.readvideo(url))
