@@ -44,7 +44,7 @@ def detectAndDisplay(frame):
             radius = int((w2 + h2)*0.25)
             cv2.circle(frame, eye_center, radius, (255, 0, 0), 2)
     cv2.imshow('Face detection', frame)
-#Función modificada por Cristian 04-06-2019
+#-- Función modificada por Cristian 04-06-2019
 
 def tryload():
     #-- Info CPU, Optimization OPENCV
@@ -67,17 +67,29 @@ def tryload():
 
 def readvideo():
     #-- Try read video streaming
-    imgResp = urllib.request.urlopen(url)
-    imgNp = np.array(bytearray(imgResp.read()),dtype=np.uint8)
-    img = cv2.imdecode(imgNp,-1)
-    return img
-
+    success = False
+    count = 1
+    while success == False:
+        try:
+            imgResp = urllib.request.urlopen(url)
+            imgNp = np.array(bytearray(imgResp.read()),dtype=np.uint8)
+            img = cv2.imdecode(imgNp,-1)
+            success = True
+            return img
+        except:
+            print('IP Camera disconnected, trying (%d/10)' % count)
+            success = False
+            count += 1
+            if count > 10:
+                return
+#-- Función modificada por Cristian 04-06-2019
 
 def playvideo():
     while True:
         img = readvideo()
         if img is None:
             print('--(!) No captured frame -- Break!')
+            print('Streaming ending')
             break
         cv2.useOptimized()
         detectAndDisplay(img)
