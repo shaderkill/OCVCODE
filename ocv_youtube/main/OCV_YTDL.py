@@ -41,33 +41,35 @@ def tryload():
 
 
 def detectAndDisplay(frame):
-    global faces_detect, faces_count
     frame_color = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frame_gray = cv2.equalizeHist(frame_color)
-
-    #-- Detect faces
-    faces = face_cascade.detectMultiScale(frame_gray, 1.3, 5)
+    #-- Detectar caras
+    faces = face_cascade.detectMultiScale(frame_gray, 1.25, 5)
     for (x, y, w, h) in faces:
-        center = (x, y)
+        top_left = (x, y)
+        botom_right = (x+w,y+h)
         faceROI = frame_gray[y:y+h, x:x+w]
         faceColor = frame[y:y+h, x:x+w]
-        #-- Capture image from Frame (experimental)
-        """if not compareframe(faceROI):
-        path = 'D:\\Usuarios\\cristian.molina\\Desktop\\Instituto\\OCVCODE-master\\ocv_youtube\\photos'
-        cv2.imwrite(os.path.join(path, "face%d.jpg" % faces_count), faceColor)"""
-        frame = cv2.rectangle(frame, center, (x+w,y+h), (0, 255, 0), 2)
+        frame = cv2.rectangle(frame, top_left, botom_right, (43, 248, 243), 1)
         faces_xywh = str(x),str(y),str(w),str(h)
         faces_str = str(faces_xywh)
-        cv2.putText(frame,faces_str, (x-5,y-5),cv2.FONT_HERSHEY_PLAIN,1, (255, 0, 255),1)
-        #-- Detect eyes
+        cv2.putText(frame,faces_str, (x-15,y-15),cv2.FONT_HERSHEY_PLAIN,1, (255, 0, 255),1)
+        #-- Detectar ojos
         eyes = eyes_cascade.detectMultiScale(faceROI)
         for (x2, y2, w2, h2) in eyes:
             eye_center = (x + x2 + w2//2, y + y2 + h2//2)
             radius = int((w2 + h2)*0.25)
-            cv2.circle(frame, eye_center, radius, (255, 0, 0), 2)
+            cv2.circle(frame, eye_center, radius, (43, 248, 243), 1)
+        #-- Detectar sonrisas
+        smiles = smile_cascade.detectMultiScale(faceROI, 1.3, 26)
+        for (x3, y3, w3, h3) in smiles:
+            top_left = (x3, y3)
+            botom_right = (x3 + w3, y3 + h3)
+            cv2.rectangle(faceColor, top_left, botom_right, (43, 248, 243), 1)
+            cv2.putText(frame,"Sonriendo", (x-15, y + 250),cv2.FONT_HERSHEY_PLAIN,1, (255, 0, 255),1)
+    cv2.imshow('IP Camera - Deteccion de caras', frame)
+#-- Función modificada por Cristian 05-06-2019
 
-    cv2.imshow('Capture - Face detection', frame)
-#Modulo modificado por Cristian 04-06-2019
 
 def playvideo():
     cap = cv2.VideoCapture(stream.readvideo(url.load()))

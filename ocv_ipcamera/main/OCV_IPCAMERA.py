@@ -1,5 +1,4 @@
 try:
-    from __future__ import print_function
     import numpy as np
     import os.path
     import cv2
@@ -137,6 +136,5 @@ smile_cascade_name = smile_cascade.load()
 face_cascade = cv2.CascadeClassifier()
 eyes_cascade = cv2.CascadeClassifier()
 smile_cascade = cv2.CascadeClassifier()
-
 tryload()
 playvideo()
