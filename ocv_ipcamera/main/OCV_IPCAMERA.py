@@ -1,3 +1,4 @@
+#-- Llamar imports y avisar cuales no estan instalados.
 try:
     import numpy as np
     import os.path
@@ -15,7 +16,8 @@ try:
 except ImportError as e:
     print(e)
     print('Para poder instalar el modulo use el siguiente comando "pip install <modulo>"')
-#-- Llamar imports fuera de la carpeta main
+    exit(0)
+
 
 
 #-- Función archivada, Numpy to PIL para manejo de imagenes
@@ -27,7 +29,7 @@ except ImportError as e:
     img = Image.fromarray(np_array, 'RGB')
     return img"""
 
-
+#-- Función encargada de detectar y dibujar las cascadas
 def detectAndDisplay(frame):
     frame_color = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frame_gray = cv2.equalizeHist(frame_color)
@@ -58,9 +60,8 @@ def detectAndDisplay(frame):
     cv2.imshow('IP Camera - Detección de caras', frame)
 #-- Función modificada por Cristian 05-06-2019
 
-
+#-- Cargar cascadas
 def tryload():
-    #-- Info CPU, Optimization OPENCV
     print("-"*100)
     print("Hilos:",cv2.getNumThreads())
     print("Nucleos:",cv2.getNumberOfCPUs())
@@ -68,7 +69,6 @@ def tryload():
     print("-"*100)
     print("-"*100)
     #Info CPU modificado por Cristian 04-06-2019
-    #-- Load the cascades
     if not face_cascade.load(cv2.samples.findFile(face_cascade_name)):
         print('--(!)Error cargando "face cascade"')
         exit(0)
@@ -79,9 +79,8 @@ def tryload():
         print('--(!)EError cargando "smile cascade"')
         exit(0)
 
-
+#-- Intentar capturar video streaming
 def readvideo():
-    #-- Try read video streaming
     success = False
     count = 1
     while success == False:
@@ -98,6 +97,7 @@ def readvideo():
                 return
 #-- Función modificada por Cristian 04-06-2019
 
+#-- Reproducir el video capturado.
 def playvideo():
     while True:
         img = readvideo()
@@ -109,7 +109,7 @@ def playvideo():
         detectAndDisplay(img)
         if cv2.waitKey(1) == ord('q'):
             break
-#-- Función modificada por Cristian 04-06-2019
+#-- Función modificada por Cristian 04-06-2019.
 
 class video:
     def __init__(self, url_video):
@@ -124,6 +124,7 @@ class cascada:
 
     def load(self):
         return self.dir_path
+#-- Se crearon ambas clases para mantener datos de cascadas y videos
 
 #-- Proceso principal
 face_cascade = cascada('D:\\opencv\\opencv\\sources\\data\\lbpcascades\\lbpcascade_frontalface_improved.xml')
