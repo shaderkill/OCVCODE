@@ -48,7 +48,7 @@ def detectAndDisplay(frame):
     frame_color = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frame_gray = cv2.equalizeHist(frame_color)
     #-- Detectar caras de frente
-    ffaces = frontalface_cascade.detectMultiScale(frame_gray, 1.3, 5)
+    ffaces = frontalface_cascade.detectMultiScale(frame_gray, 1.25, 5)
     if len(ffaces) > 0:
         for (x, y, w, h) in ffaces:
             top_left = (x, y)
