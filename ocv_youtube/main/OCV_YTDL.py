@@ -1,32 +1,42 @@
-from __future__ import print_function
-import cv2
-import argparse
-import time
-import pafy
-import youtube_dl
-import numpy as np
-import os
-from os import path
-if __name__ == '__main__':
-    import sys
-    sys.path.append(path.join(path.dirname(__file__), '..'))
-    from resources import read
-
+try:
+    import cv2
+    import argparse
+    import time
+    import pafy
+    import youtube_dl
+    import numpy as np
+    import os
+    from array import array
+    from os import path
+    if __name__ == '__main__':
+        import sys
+        sys.path.append(path.join(path.dirname(__file__), '..'))
+        from resources import stream
+except ImportError as e:
+    print(e)
+    print('Para poder instalar el modulo use el siguiente comando "pip install <modulo>"')
+#-- Llamar imports fuera de la carpeta main
 
 def tryload():
     #-- Info CPU, Optimization OPENCV
     print("-"*100)
-    print("Threads:",cv2.getNumThreads())
-    print("Cores:",cv2.getNumberOfCPUs())
-    print("Optimized:",cv2.useOptimized())
+    print("Hilos:",cv2.getNumThreads())
+    print("Nucleos:",cv2.getNumberOfCPUs())
+    print("OpenCV optimizado:",cv2.useOptimized())
     print("-"*100)
     #Info CPU modificado por Cristian 04-06-2019
     #-- Load the cascades
-    if not face_cascade.load(cv2.samples.findFile(face_cascade_name)):
-        print('--(!)Error loading face cascade')
+    file = face_cascades.read()
+    if not face_cascade.load(cv2.samples.findFile(file)):
+        print('--(!)Error cargando "face cascade"')
         exit(0)
-    if not eyes_cascade.load(cv2.samples.findFile(eyes_cascade_name)):
-        print('--(!)Error loading eyes cascade')
+    file = eyes_cascades.read()
+    if not eyes_cascade.load(cv2.samples.findFile(file)):
+        print('--(!)Error cargando "eyes cascade"')
+        exit(0)
+    file = smile_cascades.read()
+    if not smile_cascade.load(cv2.samples.findFile(file)):
+        print('--(!)EError cargando "smile cascade"')
         exit(0)
 
 
@@ -60,8 +70,9 @@ def detectAndDisplay(frame):
 #Modulo modificado por Cristian 04-06-2019
 
 def playvideo():
-    cap = cv2.VideoCapture(read.readvideo(url))
+    cap = cv2.VideoCapture(stream.readvideo(url.load()))
     cap.set(cv2.CAP_PROP_FPS, 60)
+        
     if not cap.isOpened:
         print('--(!)Error opening video capture')
         exit(0)
@@ -77,25 +88,30 @@ def playvideo():
         if cv2.waitKey(1) == ord('q'):
             break
 
+#-- Función modificada por Cristian 04-06-2019
 
-# Define arguments parse
-parser = argparse.ArgumentParser(
-    description='Code for Cascade Classifier tutorial.')
-parser.add_argument('--face_cascade', help='Path to face cascade.', 
-                    default='D:\\opencv\\opencv\\sources\\data\\lbpcascades\\lbpcascade_frontalface_improved.xml')
-parser.add_argument('--eyes_cascade', help='Path to eyes cascade.', 
-                    default='D:\\OpenCV\\opencv\\sources\\data\\haarcascades\\haarcascade_eye_tree_eyeglasses.xml')
-parser.add_argument(
-    '--urlvideo', help='Video streaming.', default='https://www.youtube.com/watch?v=4PkcfQtibmU')
+class video:
+    def __init__(self,url_video):
+        self.url = url_video
 
-args = parser.parse_args()
-face_cascade_name = args.face_cascade
-eyes_cascade_name = args.eyes_cascade
-url = args.urlvideo
+    def load(self):
+        return self.url
+
+class cascada:
+    def __init__(self, dir_path):
+        self.dir_path = dir_path
+
+    def read(self):
+        return self.dir_path
+
+#-- Proceso principal
+face_cascades = cascada('D:\\opencv\\opencv\\sources\\data\\lbpcascades\\lbpcascade_frontalface_improved.xml')
+eyes_cascades = cascada('D:\\OpenCV\\opencv\\sources\\data\\haarcascades\\haarcascade_eye_tree_eyeglasses.xml')
+smile_cascades = cascada('D:\\OpenCV\\opencv\\sources\\data\\haarcascades\\haarcascade_smile.xml')
 face_cascade = cv2.CascadeClassifier()
 eyes_cascade = cv2.CascadeClassifier()
-
+smile_cascade = cv2.CascadeClassifier()
+url = video(input('Inserte el url de un video de youtube:\n'))
 tryload()
 playvideo()
-
         
