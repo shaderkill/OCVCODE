@@ -1,33 +1,13 @@
-#-- Llamar imports y avisar cuales no estan instalados.
-import numpy as np
-import os.path
+# -- Imports
+import urllib.request
+from os.path import normpath, realpath
+
 import cv2
-import argparse
-import time
-import urllib
-from urllib.request import urlopen
-from PIL import Image
-import os
-from os import path
-if __name__ == '__main__':
-    import sys
-    sys.path.append(path.join(path.dirname(__file__), '..'))
+import numpy as np
 
 
-
-
-#-- Función archivada, Numpy to PIL para manejo de imagenes
-"""def numpy2pil(np_array: np.ndarray) -> Image:
-    assert_msg = 'Input'
-    assert isinstance(np_array, np.ndarray), assert_msg
-    assert len(np_array.shape) == 3, assert_msg
-    assert np_array.shape[2] == 3, assert_msg
-    img = Image.fromarray(np_array, 'RGB')
-    return img"""
-
-#-- Función encargada de detectar y dibujar las cascadas
-
-
+# -- Funciones
+# -- Función encargada de detectar y dibujar las cascadas
 def detect_and_display(frame):
     frame_color = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frame_gray = cv2.equalizeHist(frame_color)
@@ -81,56 +61,70 @@ def detect_and_display(frame):
     cv2.imshow('IP Camera - Deteccion de caras', frame)
 # -- Función modificada por Cristian 05-06-2019
 
-#-- Cargar cascadas
+
+# -- Cargar cascadas
 def tryload():
+    # -- Info CPU, Optimization OPENCV
     print("-"*100)
-    print("Hilos:",cv2.getNumThreads())
-    print("Nucleos:",cv2.getNumberOfCPUs())
-    print("OpenCV optimizado:",cv2.useOptimized())
+    print("Hilos:", cv2.getNumThreads())
+    print("Nucleos:", cv2.getNumberOfCPUs())
+    print("OpenCV optimizado:", cv2.useOptimized())
     print("-"*100)
-    print("-"*100)
-    #Info CPU modificado por Cristian 04-06-2019
-    if not face_cascade.load(cv2.samples.findFile(face_cascade_name)):
-        print('--(!)Error cargando "face cascade"')
+    # -- Info CPU modificado por Cristian 04-06-2019
+    # -- Load the cascades
+    file = frontalface_cascades.read()
+    print(file)
+    if not frontalface_cascade.load(cv2.samples.findFile(file)):
+        print(' -- (!)Error cargando "face cascade"')
         exit(0)
-    if not eyes_cascade.load(cv2.samples.findFile(eyes_cascade_name)):
-        print('--(!)Error cargando "eyes cascade"')
+    file = profileface_cascades.read()
+    if not profileface_cascade.load(cv2.samples.findFile(file)):
+        print(' -- (!)Error cargando "face cascade"')
         exit(0)
-    if not smile_cascade.load(cv2.samples.findFile(smile_cascade_name)):
-        print('--(!)EError cargando "smile cascade"')
+    file = eyes_cascades.read()
+    if not eyes_cascade.load(cv2.samples.findFile(file)):
+        print(' -- (!)Error cargando "eyes cascade"')
+        exit(0)
+    file = smile_cascades.read()
+    if not smile_cascade.load(cv2.samples.findFile(file)):
+        print(' -- (!)EError cargando "smile cascade"')
         exit(0)
 
-#-- Intentar capturar video streaming
+
+# -- Intentar capturar video streaming
 def readvideo():
     success = False
     count = 1
-    while success == False:
+    while not success:
         try:
             imgResp = urllib.request.urlopen(url.load())
-            imgNp = np.array(bytearray(imgResp.read()),dtype=np.uint8)
-            img = cv2.imdecode(imgNp,-1)
+            imgNp = np.array(bytearray(imgResp.read()), dtype=np.uint8)
+            img = cv2.imdecode(imgNp, -1)
             success = True
             return img
-        except:
-            print('IP Camera desconectada, reintentando conectar (%d/6)' % count)
+        except Exception as e:
+            print(e, '\nReintentando conectar (%d/6)\n'
+                  % count)
             count += 1
             if count > 6:
                 return
-#-- Función modificada por Cristian 04-06-2019
+# -- Función modificada por Cristian 04-06-2019
 
-#-- Reproducir el video capturado.
+
+# -- Reproducir el video capturado.
 def playvideo():
     while True:
         img = readvideo()
         if img is None:
-            print('--(!)No se ha logrado capturar una imagen')
+            print(' -- (!)No se ha logrado capturar una imagen')
             print('Streaming finalizado')
             break
         cv2.useOptimized()
-        detectAndDisplay(img)
+        detect_and_display(img)
         if cv2.waitKey(1) == ord('q'):
             break
-#-- Función modificada por Cristian 04-06-2019.
+# -- Función modificada por Cristian 04-06-2019.
+
 
 class video:
     def __init__(self, url_video):
@@ -139,24 +133,35 @@ class video:
     def load(self):
         return self.url
 
+
 class cascada:
     def __init__(self, dir_path):
-        self.dir_path = dir_path
+        path_str = r'%s' % dir_path
+        path_str = str(path_str).replace('\\', '\\\\')
+        self.dir_path = path_str
 
-    def load(self):
+    def read(self):
         return self.dir_path
-#-- Se crearon ambas clases para mantener datos de cascadas y videos
+# -- Se crearon ambas clases para mantener datos de cascadas y videos
 
-#-- Proceso principal
-face_cascade = cascada('D:\\opencv\\opencv\\sources\\data\\lbpcascades\\lbpcascade_frontalface_improved.xml')
-eyes_cascade = cascada('D:\\OpenCV\\opencv\\sources\\data\\haarcascades\\haarcascade_eye_tree_eyeglasses.xml')
-smile_cascade = cascada('D:\\OpenCV\\opencv\\sources\\data\\haarcascades\\haarcascade_smile.xml')
-url = video('http://10.113.1.63:8080/shot.jpg')
-face_cascade_name =face_cascade.load()
-eyes_cascade_name = eyes_cascade.load()
-smile_cascade_name = smile_cascade.load()
-face_cascade = cv2.CascadeClassifier()
+
+# -- Proceso principal
+frontalface_cascades = cascada(normpath(realpath(
+    'D:/OpenCV/opencv/sources/data/' +
+    'lbpcascades/lbpcascade_frontalface_improved.xml')))
+profileface_cascades = cascada(normpath(realpath(
+    'D:/OpenCV/opencv/sources/data/' +
+    'lbpcascades/lbpcascade_profileface.xml')))
+eyes_cascades = cascada(normpath(realpath(
+    'D:/OpenCV/opencv/sources/data/' +
+    'haarcascades/haarcascade_eye_tree_eyeglasses.xml')))
+smile_cascades = cascada(normpath(realpath(
+    'D:/OpenCV/opencv/sources/data/' +
+    'haarcascades/haarcascade_smile.xml')))
+frontalface_cascade = cv2.CascadeClassifier()
+profileface_cascade = cv2.CascadeClassifier()
 eyes_cascade = cv2.CascadeClassifier()
 smile_cascade = cv2.CascadeClassifier()
+url = video('http://192.168.101.100:8080/shot.jpg')
 tryload()
 playvideo()
