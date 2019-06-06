@@ -2,8 +2,10 @@
 import sys
 import os
 from os import path
+from os.path import realpath, normpath
 import cv2
-from pathlib import Path, WindowsPath
+import pathlib
+from pathlib import WindowsPath, Path, PurePath
 # -- Llamar imports fuera de la carpeta main
 if __name__ == '__main__':
     sys.path.append(path.join(path.dirname(__file__), '..'))
@@ -21,7 +23,7 @@ def tryload():
     # -- Info CPU modificado por Cristian 04-06-2019
     # -- Load the cascades
     file = frontalface_cascades.read()
-    file
+    print(file)
     if not frontalface_cascade.load(cv2.samples.findFile(file)):
         print(' -- (!)Error cargando "face cascade"')
         exit(0)
@@ -50,29 +52,29 @@ def detect_and_display(frame):
             botom_right = (x+w, y+h)
             faceROI = frame_gray[y:y+h, x:x+w]
             faceColor = frame[y:y+h, x:x+w]
-            frame = cv2.rectangle(frame,
+            frame = cv2.rectangle(frame, 
                                   top_left, botom_right, (43, 248, 243), 1)
             faces_xywh = str(x), str(y), str(w), str(h)
             faces_str = str(faces_xywh)
-            cv2.putText(frame, faces_str,
-                        (x-15, y-15), cv2.FONT_HERSHEY_PLAIN,
+            cv2.putText(frame, faces_str, 
+                        (x-15, y-15), cv2.FONT_HERSHEY_PLAIN, 
                         1, (255, 0, 255), 1)
             # -- Detectar ojos
             eyes = eyes_cascade.detectMultiScale(faceROI)
             for (x2, y2, w2, h2) in eyes:
                 eye_center = (x + x2 + w2//2, y + y2 + h2//2)
                 radius = int((w2 + h2)*0.25)
-                cv2.circle(frame,
+                cv2.circle(frame, 
                            eye_center, radius, (43, 248, 243), 1)
             # -- Detectar sonrisas
             smiles = smile_cascade.detectMultiScale(faceROI, 1.3, 26)
             for (x3, y3, w3, h3) in smiles:
                 top_left = (x3, y3)
                 botom_right = (x3 + w3, y3 + h3)
-                cv2.rectangle(faceColor,
+                cv2.rectangle(faceColor, 
                               top_left, botom_right, (43, 248, 243), 1)
-                cv2.putText(frame, "Sonriendo",
-                            (x-15, y + 250), cv2.FONT_HERSHEY_PLAIN,
+                cv2.putText(frame, "Sonriendo", 
+                            (x-15, y + 250), cv2.FONT_HERSHEY_PLAIN, 
                             1, (255, 0, 255), 1)
     else:
         # -- Detectar caras de frente
@@ -82,12 +84,12 @@ def detect_and_display(frame):
             botom_right = (x+w, y+h)
             faceROI = frame_gray[y:y+h, x:x+w]
             faceColor = frame[y:y+h, x:x+w]
-            frame = cv2.rectangle(frame,
+            frame = cv2.rectangle(frame, 
                                   top_left, botom_right, (43, 248, 243), 1)
             faces_xywh = str(x), str(y), str(w), str(h)
             faces_str = str(faces_xywh)
-            cv2.putText(frame, faces_str,
-                        (x-15, y-15), cv2.FONT_HERSHEY_PLAIN,
+            cv2.putText(frame, faces_str, 
+                        (x-15, y-15), cv2.FONT_HERSHEY_PLAIN, 
                         1, (255, 0, 255), 1)
     cv2.imshow('IP Camera - Deteccion de caras', frame)
 # -- Función modificada por Cristian 05-06-2019
@@ -124,19 +126,20 @@ class video:
 
 class cascada:
     def __init__(self, dir_path):
-        print(dir_path)
-        self.dir_path = dir_path
-
+        path_str = r'%s' % dir_path
+        path_str = str(path_str).replace('\\', '\\\\')
+        self.dir_path = path_str
     def read(self):
         return self.dir_path
 
 
 # -- Proceso principal
 # -- Se crean objetos con sus respectivos atributos
-frontalface_cascades = cascada(WindowsPath(Path('lbpcascade_frontalface_improved.xml').resolve()))
-profileface_cascades = cascada(WindowsPath(Path('lbpcascade_profileface.xml').resolve()))
-eyes_cascades = cascada(WindowsPath(Path('haarcascade_eye_tree_eyeglasses.xml').resolve()))
-smile_cascades = cascada(WindowsPath((Path('haarcascade_smile.xml').resolve())))
+print(cv2.__file__)
+frontalface_cascades = cascada(normpath(realpath('D:/OpenCV/opencv/sources/data/lbpcascades/lbpcascade_frontalface_improved.xml')))
+profileface_cascades = cascada(normpath(realpath('D:/OpenCV/opencv/sources/data/lbpcascades/lbpcascade_profileface.xml')))
+eyes_cascades = cascada(normpath(realpath('D:/OpenCV/opencv/sources/data/haarcascades/haarcascade_eye_tree_eyeglasses.xml')))
+smile_cascades = cascada(normpath(realpath('D:/OpenCV/opencv/sources/data/haarcascades/haarcascade_smile.xml')))
     #'D:\\OpenCV\\opencv\\sources\\data\\haarcascades\\haarcascade_smile.xml')
 frontalface_cascade = cv2.CascadeClassifier()
 profileface_cascade = cv2.CascadeClassifier()
