@@ -1,22 +1,18 @@
 #-- Llamar imports y avisar cuales no estan instalados.
-try:
-    import numpy as np
-    import os.path
-    import cv2
-    import argparse
-    import time
-    import urllib
-    from urllib.request import urlopen
-    from PIL import Image
-    import os
-    from os import path
-    if __name__ == '__main__':
-        import sys
-        sys.path.append(path.join(path.dirname(__file__), '..'))
-except ImportError as e:
-    print(e)
-    print('Para poder instalar el modulo use el siguiente comando "pip install <modulo>"')
-    exit(0)
+import numpy as np
+import os.path
+import cv2
+import argparse
+import time
+import urllib
+from urllib.request import urlopen
+from PIL import Image
+import os
+from os import path
+if __name__ == '__main__':
+    import sys
+    sys.path.append(path.join(path.dirname(__file__), '..'))
+
 
 
 
@@ -30,35 +26,60 @@ except ImportError as e:
     return img"""
 
 #-- Función encargada de detectar y dibujar las cascadas
-def detectAndDisplay(frame):
+
+
+def detect_and_display(frame):
     frame_color = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frame_gray = cv2.equalizeHist(frame_color)
-    #-- Detectar caras
-    faces = face_cascade.detectMultiScale(frame_gray, 1.3, 5)
-    for (x, y, w, h) in faces:
-        top_left = (x, y)
-        botom_right = (x+w,y+h)
-        faceROI = frame_gray[y:y+h, x:x+w]
-        faceColor = frame[y:y+h, x:x+w]
-        frame = cv2.rectangle(frame, top_left, botom_right, (43, 248, 243), 1)
-        faces_xywh = str(x),str(y),str(w),str(h)
-        faces_str = str(faces_xywh)
-        cv2.putText(frame,faces_str, (x-15,y-15),cv2.FONT_HERSHEY_PLAIN,1, (255, 0, 255),1)
-        #-- Detectar ojos
-        eyes = eyes_cascade.detectMultiScale(faceROI)
-        for (x2, y2, w2, h2) in eyes:
-            eye_center = (x + x2 + w2//2, y + y2 + h2//2)
-            radius = int((w2 + h2)*0.25)
-            cv2.circle(frame, eye_center, radius, (43, 248, 243), 1)
-        #-- Detectar sonrisas
-        smiles = smile_cascade.detectMultiScale(faceROI, 1.3, 26)
-        for (x3, y3, w3, h3) in smiles:
-            top_left = (x3, y3)
-            botom_right = (x3 + w3, y3 + h3)
-            cv2.rectangle(faceColor, top_left, botom_right, (43, 248, 243), 1)
-            cv2.putText(frame,"Sonriendo", (x-15, y + 250),cv2.FONT_HERSHEY_PLAIN,1, (255, 0, 255),1)
-    cv2.imshow('IP Camera - Detección de caras', frame)
-#-- Función modificada por Cristian 05-06-2019
+    # -- Detectar caras de frente
+    ffaces = frontalface_cascade.detectMultiScale(frame_gray, 1.25, 5)
+    if len(ffaces) > 0:
+        for (x, y, w, h) in ffaces:
+            top_left = (x, y)
+            botom_right = (x+w, y+h)
+            faceROI = frame_gray[y:y+h, x:x+w]
+            faceColor = frame[y:y+h, x:x+w]
+            frame = cv2.rectangle(frame,
+                                  top_left, botom_right, (43, 248, 243), 1)
+            faces_xywh = str(x), str(y), str(w), str(h)
+            faces_str = str(faces_xywh)
+            cv2.putText(frame, faces_str,
+                        (x-15, y-15), cv2.FONT_HERSHEY_PLAIN,
+                        1, (255, 0, 255), 1)
+            # -- Detectar ojos
+            eyes = eyes_cascade.detectMultiScale(faceROI)
+            for (x2, y2, w2, h2) in eyes:
+                eye_center = (x + x2 + w2//2, y + y2 + h2//2)
+                radius = int((w2 + h2)*0.25)
+                cv2.circle(frame,
+                           eye_center, radius, (43, 248, 243), 1)
+            # -- Detectar sonrisas
+            smiles = smile_cascade.detectMultiScale(faceROI, 1.3, 26)
+            for (x3, y3, w3, h3) in smiles:
+                top_left = (x3, y3)
+                botom_right = (x3 + w3, y3 + h3)
+                cv2.rectangle(faceColor,
+                              top_left, botom_right, (43, 248, 243), 1)
+                cv2.putText(frame, "Sonriendo",
+                            (x-15, y + 250), cv2.FONT_HERSHEY_PLAIN,
+                            1, (255, 0, 255), 1)
+    else:
+        # -- Detectar caras de frente
+        pfaces = profileface_cascade.detectMultiScale(frame_gray, 1.3, 2)
+        for (x, y, w, h) in pfaces:
+            top_left = (x, y)
+            botom_right = (x+w, y+h)
+            faceROI = frame_gray[y:y+h, x:x+w]
+            faceColor = frame[y:y+h, x:x+w]
+            frame = cv2.rectangle(frame,
+                                  top_left, botom_right, (43, 248, 243), 1)
+            faces_xywh = str(x), str(y), str(w), str(h)
+            faces_str = str(faces_xywh)
+            cv2.putText(frame, faces_str,
+                        (x-15, y-15), cv2.FONT_HERSHEY_PLAIN,
+                        1, (255, 0, 255), 1)
+    cv2.imshow('IP Camera - Deteccion de caras', frame)
+# -- Función modificada por Cristian 05-06-2019
 
 #-- Cargar cascadas
 def tryload():
