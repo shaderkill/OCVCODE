@@ -1,14 +1,64 @@
+# -- coding: UTF-8 --
+# -- Linter: Pylint --
+# -- Python ver. 3.7.3 --
+# -- PySimpleGUI ver. 3.37.0
+# -- opencv-python ver. 4.1.0.25
+"""OpenCV Licence
+Copyright (C) 2000-2019, Intel Corporation, all rights reserved.
+Copyright (C) 2009-2011, Willow Garage Inc., all rights reserved.
+Copyright (C) 2009-2016, NVIDIA Corporation, all rights reserved.
+Copyright (C) 2010-2013, Advanced Micro Devices, Inc., all rights reserved.
+Copyright (C) 2015-2016, OpenCV Foundation, all rights reserved.
+Copyright (C) 2015-2016, Itseez Inc., all rights reserved.
+Third party copyrights are property of their respective owners.
+
+OpenCV was built to provide a common infrastructure for computer vision
+applications and to accelerate the use of machine perception in the
+commercial products.
+Being a BSD-licensed product, OpenCV makes it easy for businesses to
+utilize and modify the code."""
+
 # -- Imports
 import urllib.request
 from os.path import normpath, realpath
 
 import cv2
 import numpy as np
+import PySimpleGUI as sg
 
 
-# -- Funciones
-# -- Función encargada de detectar y dibujar las cascadas
+# -- Definición de funciones
+
+def tryload():
+
+    # -- Carga de cascadas e info OPENCV/CPU
+    print("-"*100)
+    print("Hilos:", cv2.getNumThreads())
+    print("Nucleos:", cv2.getNumberOfCPUs())
+    print("OpenCV optimizado:", cv2.useOptimized())
+    print("-"*100)
+    file = frontalface_cascades.read()
+    if not frontalface_cascade.load(cv2.samples.findFile(file)):
+        print(' -- (!)Error cargando "face cascade"')
+        exit(0)
+    file = profileface_cascades.read()
+    if not profileface_cascade.load(cv2.samples.findFile(file)):
+        print(' -- (!)Error cargando "face cascade"')
+        exit(0)
+    file = eyes_cascades.read()
+    if not eyes_cascade.load(cv2.samples.findFile(file)):
+        print(' -- (!)Error cargando "eyes cascade"')
+        exit(0)
+    file = smile_cascades.read()
+    if not smile_cascade.load(cv2.samples.findFile(file)):
+        print(' -- (!)EError cargando "smile cascade"')
+        exit(0)
+    playvideo()
+# -- Función modificada por Cristian 06-06-2019
+
+
 def detect_and_display(frame):
+    # -- Función encargada de detectar y dibujar las cascadas
     frame_color = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frame_gray = cv2.equalizeHist(frame_color)
     # -- Detectar caras de frente
@@ -59,40 +109,11 @@ def detect_and_display(frame):
                         (x-15, y-15), cv2.FONT_HERSHEY_PLAIN,
                         1, (255, 0, 255), 1)
     cv2.imshow('IP Camera - Deteccion de caras', frame)
-# -- Función modificada por Cristian 05-06-2019
+# -- Función modificada por Cristian 06-06-2019
 
 
-# -- Cargar cascadas
-def tryload():
-    # -- Info CPU, Optimization OPENCV
-    print("-"*100)
-    print("Hilos:", cv2.getNumThreads())
-    print("Nucleos:", cv2.getNumberOfCPUs())
-    print("OpenCV optimizado:", cv2.useOptimized())
-    print("-"*100)
-    # -- Info CPU modificado por Cristian 04-06-2019
-    # -- Load the cascades
-    file = frontalface_cascades.read()
-    print(file)
-    if not frontalface_cascade.load(cv2.samples.findFile(file)):
-        print(' -- (!)Error cargando "face cascade"')
-        exit(0)
-    file = profileface_cascades.read()
-    if not profileface_cascade.load(cv2.samples.findFile(file)):
-        print(' -- (!)Error cargando "face cascade"')
-        exit(0)
-    file = eyes_cascades.read()
-    if not eyes_cascade.load(cv2.samples.findFile(file)):
-        print(' -- (!)Error cargando "eyes cascade"')
-        exit(0)
-    file = smile_cascades.read()
-    if not smile_cascade.load(cv2.samples.findFile(file)):
-        print(' -- (!)EError cargando "smile cascade"')
-        exit(0)
-
-
-# -- Intentar capturar video streaming
 def readvideo():
+    # -- Intentar capturar video streaming
     success = False
     count = 1
     while not success:
@@ -103,12 +124,18 @@ def readvideo():
             success = True
             return img
         except Exception as e:
-            print(e, '\nReintentando conectar (%d/6)\n'
-                  % count)
-            count += 1
-            if count > 6:
+            yesno = sg.PopupYesNo(
+                'Error al conectar, ¿Desea reintentar la conexión?\n(Intento %d/3)\n\n' % count,
+                'Detalle del error: %s\n\n' % e,
+                title='Error')
+            if yesno == 'Yes':
+                count += 1
+                if count > 3:
+                    return
+            else:
+                sg.PopupAutoClose('Cancelando la conexión', title='Open CV')
                 return
-# -- Función modificada por Cristian 04-06-2019
+# -- Función modificada por Cristian 06-06-2019
 
 
 # -- Reproducir el video capturado.
@@ -116,25 +143,42 @@ def playvideo():
     while True:
         img = readvideo()
         if img is None:
-            print(' -- (!)No se ha logrado capturar una imagen')
-            print('Streaming finalizado')
-            break
+            sg.PopupAutoClose(
+                'No se ha logrado capturar una imagen',
+                'Streaming finalizado', title='Error')
+            exit(0)
         cv2.useOptimized()
         detect_and_display(img)
         if cv2.waitKey(1) == ord('q'):
-            break
-# -- Función modificada por Cristian 04-06-2019.
+            # -- Consulta de seguridad para finalizar streaming proceso
+            yesno = sg.PopupYesNo(
+                '¿Esta seguro que desea cerrar el streaming?',
+                title='OpenCV Camera')
+            if yesno == 'Yes':
+                sg.PopupAutoClose(
+                    'El streaming de la IP Camera ha terminado',
+                    title='OpenCV Camera')
+                exit(0)
+            else:
+                pass
+# -- Función modificada por Cristian 06-06-2019.
 
 
+# -- Clases definidas
 class video:
+
+    # -- Crea la clase video con su respectivo URL
     def __init__(self, url_video):
         self.url = url_video
 
     def load(self):
         return self.url
+# -- Clase modificada por Cristian 05-06-2019
 
 
 class cascada:
+
+    # -- Crea la clase cascada con su respectiva dirección PATH
     def __init__(self, dir_path):
         path_str = r'%s' % dir_path
         path_str = str(path_str).replace('\\', '\\\\')
@@ -142,10 +186,11 @@ class cascada:
 
     def read(self):
         return self.dir_path
-# -- Se crearon ambas clases para mantener datos de cascadas y videos
+# -- Clase modificada por Cristian 06-06-2019
 
 
 # -- Proceso principal
+# -- Se crean objetos con sus respectivos atributos
 frontalface_cascades = cascada(normpath(realpath(
     'D:/OpenCV/opencv/sources/data/' +
     'lbpcascades/lbpcascade_frontalface_improved.xml')))
@@ -162,6 +207,16 @@ frontalface_cascade = cv2.CascadeClassifier()
 profileface_cascade = cv2.CascadeClassifier()
 eyes_cascade = cv2.CascadeClassifier()
 smile_cascade = cv2.CascadeClassifier()
-url = video('http://192.168.101.100:8080/shot.jpg')
-tryload()
-playvideo()
+
+# -- Consulta inicial para empezar proceso
+yesno = sg.PopupYesNo(
+    'Bienvenido\n¿Desea iniciar el streaming de la IP camera?',
+    title='OpenCV Camera')
+if yesno == 'Yes':
+    url = video('http://10.113.1.63:8080/shot.jpg')
+    tryload()
+    playvideo()
+else:
+    sg.PopupAutoClose(
+        'El streaming de la IP Camera ha sido cancelado',
+        title='OpenCV Camera')
