@@ -38,6 +38,7 @@ def tryload():
     print("OpenCV optimizado:", cv2.useOptimized())
     print("-"*100)
     file = frontalface_cascades.read()
+    # frontalface_cascade.load(cv2.samples.findFile(file)):
     if not frontalface_cascade.load(cv2.samples.findFile(file)):
         print(' -- (!)Error cargando "face cascade"')
         exit(0)
@@ -125,7 +126,8 @@ def readvideo():
             return img
         except Exception as e:
             yesno = sg.PopupYesNo(
-                'Error al conectar, ¿Desea reintentar la conexión?\n(Intento %d/3)\n\n' % count,
+                'Error al conectar, ¿Desea reintentar la conexión?',
+                '\n(Intento %d/3)\n\n' % count,
                 'Detalle del error: %s\n\n' % e,
                 title='Error')
             if yesno == 'Yes':
