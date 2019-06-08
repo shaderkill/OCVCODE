@@ -64,6 +64,10 @@ def detect_and_display(frame):
     frame_gray = cv2.equalizeHist(frame_color)
     # -- Detectar caras de frente
     ffaces = frontalface_cascade.detectMultiScale(frame_gray, 1.25, 5)
+    if type(ffaces) != type(tuple):
+        for i in ffaces:
+            print(i)
+    #print(type(ffaces))
     if len(ffaces) > 0:
         for (x, y, w, h) in ffaces:
             top_left = (x, y)
@@ -72,6 +76,7 @@ def detect_and_display(frame):
             faceColor = frame[y:y+h, x:x+w]
             frame = cv2.rectangle(frame,
                                   top_left, botom_right, (43, 248, 243), 1)
+            cv2.circle(frame, (x,y), (15),(255,0,255), 1)
             faces_xywh = str(x), str(y), str(w), str(h)
             faces_str = str(faces_xywh)
             cv2.putText(frame, faces_str,
@@ -215,7 +220,7 @@ yesno = sg.PopupYesNo(
     'Bienvenido\n¿Desea iniciar el streaming de la IP camera?',
     title='OpenCV Camera')
 if yesno == 'Yes':
-    url = video('http://10.113.1.63:8080/shot.jpg')
+    url = video('http://192.168.43.112:8080/shot.jpg')
     tryload()
     playvideo()
 else:

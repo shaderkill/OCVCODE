@@ -3,17 +3,16 @@
 # -- Python ver. 3.7.3 --
 
 # -- Imports
+from __future__ import absolute_import
+
 import sys
 from os import path
 from os.path import realpath, normpath
 import cv2
 import PySimpleGUI as sg
-
 # -- Imports fuera de la carpeta
 if __name__ == '__main__':
-    sys.path.append(path.join(path.dirname(__file__), '..'))
-    from resources import stream
-
+    from ..resources import stream
 
 # -- Definición de funciones
 
@@ -52,8 +51,9 @@ def detect_and_display(frame):
     frame_gray = cv2.equalizeHist(frame_color)
     # -- Detectar caras de frente
     ffaces = frontalface_cascade.detectMultiScale(frame_gray, 1.25, 5)
+    print(type(ffaces))
     if len(ffaces) > 0:
-        for (x, y, w, h) in ffaces:
+        for (x, y, w, h) in ffaces: #Dibujar cuadro sobre cara
             top_left = (x, y)
             botom_right = (x+w, y+h)
             faceROI = frame_gray[y:y+h, x:x+w]
@@ -67,13 +67,15 @@ def detect_and_display(frame):
                         1, (255, 0, 255), 1)
             # -- Detectar ojos
             eyes = eyes_cascade.detectMultiScale(faceROI)
-            for (x2, y2, w2, h2) in eyes:
+            print(type(eyes))
+            for (x2, y2, w2, h2) in eyes: #Dibujar circulos sobre ojos
                 eye_center = (x + x2 + w2//2, y + y2 + h2//2)
                 radius = int((w2 + h2)*0.25)
                 cv2.circle(frame,
                            eye_center, radius, (43, 248, 243), 1)
             # -- Detectar sonrisas
             smiles = smile_cascade.detectMultiScale(faceROI, 1.3, 26)
+            print(type(smiles))
             for (x3, y3, w3, h3) in smiles:
                 top_left = (x3, y3)
                 botom_right = (x3 + w3, y3 + h3)
@@ -204,5 +206,3 @@ else:
     sg.PopupOK('Streaming finalizado', title='OpenCV')
     exit(0)
 
-# -- Se llaman a las funciones ya definidas
-tryload()
