@@ -1,5 +1,5 @@
 # OpenCV-Youtube
-Testing OpenCV in Youtube
+## Prueba de OpenCV con Haarcascades precompiladas.
 
 Pequeña prueba de OpenCV, realizada con un video descargado desde Youtube con Youtube-DL la cual ha sido simulada con la aplicación IP Camera disponible en Android.
 
